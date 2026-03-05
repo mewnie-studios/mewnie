@@ -102,7 +102,7 @@ export default function Home() {
               },
               {
                 q: "Can I use the app right now?",
-                a: "Unfortunately, the app is still currently in beta but you can sign up to the beta waitlist where you'll be the first to try the app!",
+                a: "Unfortunately, the app is still currently in a closed beta but you can sign up below to join the waitlist! (Limited numbers)",
               },
               {
                 q: "What makes this app different from other apps?",
