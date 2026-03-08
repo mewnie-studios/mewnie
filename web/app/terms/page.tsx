@@ -2,10 +2,10 @@
 import Link from "next/link";
 import Image from "next/image";
 
+
 export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-[rgb(200,240,209)] font-sans text-gray-900">
-      {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#756281] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link href="/" className="hover:opacity-80 transition-opacity">
