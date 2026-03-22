@@ -4,6 +4,7 @@ import Image from "next/image";
 import FadeIn from "@/components/FadeIn";
 import HowItWorks from "@/components/HowItWorks";
 import VideoPlayer from "@/components/VideoPlayer";
+import WaitlistForm from "@/components/WaitlistForm";
 
 export default function Home() {
   return (
@@ -30,10 +31,10 @@ export default function Home() {
           <div className="flex items-center gap-4">
 
             <Link
-              href="/signup"
+              href="#waitlist-hero"
               className="px-5 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-gray-200 transition-all hover:scale-105 active:scale-95"
             >
-              Join Beta
+              Join waitlist
             </Link>
           </div>
         </div>
@@ -41,11 +42,12 @@ export default function Home() {
 
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="w-full relative">
+        <section id="waitlist-hero" className="w-full relative scroll-mt-20">
             <div className="relative w-full">
+              {/* Background Image */}
               <Image
-                src="/frontpage.png"
-                alt="Mewnie Interface"
+                src="/frontpageclear.png"
+                alt="Mewnie Interface Background"
                 width={0}
                 height={0}
                 sizes="100vw"
@@ -53,6 +55,23 @@ export default function Home() {
                 priority
                 unoptimized
               />
+
+              {/* Foreground Overlay Content */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-6 text-center md:-mt-12">
+                <FadeIn>
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#483556] tracking-tight drop-shadow-xl mb-3 md:mb-5">
+                    Making Health Fun
+                  </h1>
+                </FadeIn>
+                <FadeIn delay={0.1}>
+                  <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-[#362741] font-semibold max-w-xs sm:max-w-md md:max-w-2xl mb-6 md:mb-10 drop-shadow-lg leading-snug">
+                    Mewnie makes tracking health fun by turning your daily health habits into rewards. Be rewarded for your steps, sleep and exercise! You'll have a Pet which grows and evolves as you get healthier!
+                  </p>
+                </FadeIn>
+                <FadeIn delay={0.2} className="w-full max-w-xs sm:max-w-sm md:max-w-md">
+                  <WaitlistForm />
+                </FadeIn>
+              </div>
             </div>
         </section>
 
@@ -158,10 +177,10 @@ export default function Home() {
               
               <FadeIn delay={0.1}>
                 <Link
-                  href="/signup"
+                  href="#waitlist-hero"
                   className="px-8 py-4 mb-30 md:px-10 md:py-5 rounded-full bg-white text-black font-bold text-lg md:text-xl hover:bg-gray-100 transition-transform hover:scale-105 inline-block shadow-lg"
                 >
-                  Join Beta
+                  Join waitlist
                 </Link>
               </FadeIn>
             </div>
