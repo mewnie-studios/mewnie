@@ -8,30 +8,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Grab URL from env variables
-    const GOOGLE_SCRIPT_URL = process.env.GOOGLE_SCRIPT_URL;
+    const BREVO_API_KEY = process.env.BREVO_API_KEY;
+    const BREVO_LIST_ID = process.env.BREVO_LIST_ID;
 
-    if (!GOOGLE_SCRIPT_URL) {
-      console.warn("GOOGLE_SCRIPT_URL is not set. Simulating a successful sign-up in dev mode.");
+    if (!BREVO_API_KEY || !BREVO_LIST_ID) {
+      console.warn("Brevo API Key or List ID is not set. Simulating a successful sign-up in dev mode.");
       return NextResponse.json({ success: true, simulated: true });
     }
 
-    // Submit the email variable formatting it exactly how Apps Script expects it
-    const response = await fetch(GOOGLE_SCRIPT_URL, {
+    const response = await fetch("https://api.brevo.com/v3/contacts", {
       method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "api-key": BREVO_API_KEY,
       },
-      body: new URLSearchParams({ email }).toString(),
+      body: JSON.stringify({
+        email: email,
+        listIds: [parseInt(BREVO_LIST_ID, 10)],
+        updateEnabled: true, // Updates the contact if they are already on another list instead of throwing an error
+      }),
     });
 
-    if (response.ok) {
+    if (response.ok || response.status === 201 || response.status === 204) {
       return NextResponse.json({ success: true });
     } else {
-      throw new Error("Failed to submit to Google Sheets API");
+      const errorData = await response.json();
+      console.error("Brevo API Error:", errorData);
+      throw new Error("Failed to submit to Brevo API");
     }
   } catch (error) {
     console.error('Waitlist submission error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
