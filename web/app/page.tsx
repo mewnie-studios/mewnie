@@ -57,6 +57,7 @@ export default function Home() {
 
   // Scale artboard accurately without distortion (recreates object-cover visually)
   const [scale, setScale] = useState(1);
+  const [windowWidth, setWindowWidth] = useState(1024);
   useEffect(() => {
     const updateScale = () => {
       // The exact master artboard size from your SVGs
@@ -65,11 +66,32 @@ export default function Home() {
       const scaleX = window.innerWidth / artboardW;
       const scaleY = window.innerHeight / artboardH;
       setScale(Math.max(scaleX, scaleY));
+      setWindowWidth(window.innerWidth);
     };
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
   }, []);
+
+  // Calculate the visible width of the artboard in its internal coordinates.
+  const safeInternalWidth = scale > 0 ? (windowWidth / scale) : 1800;
+  
+  // Title stays rigorously constrained (1350px full footprint)
+  const titleUiScale = Math.min(1, (0.95 * safeInternalWidth) / 1350);
+  const titleFontSize = 85 * titleUiScale;
+  const titleStrokeWidth = 15 * titleUiScale;
+
+  // Subtitle shrinks far less gracefully (caps heavily so it doesn't get unreadable)
+  const subtitleScale = Math.min(1, (0.95 * safeInternalWidth) / 1000);
+  const subtitleFontSize = Math.max(22, 35 * subtitleScale);
+  const subtitleStrokeWidth = Math.max(3, 5 * subtitleScale);
+
+  // Form controls stay strictly large, snapping to wrap exactly on screen borders
+  const inputWidth = Math.min(650, safeInternalWidth - 40);
+  const inputHeight = windowWidth < 768 ? 60 : 75;
+  const inputFontSize = windowWidth < 768 ? 25 :32;
+  const inputPadding = 40;
+  const buttonPadding = 50;
 
   return (
     <div className="min-h-screen font-sans bg-[#C2F5FD] text-foreground selection:bg-accent-primary selection:text-white">
@@ -175,19 +197,21 @@ export default function Home() {
                   {/* Expanded arch curve with plenty of length to prevent SVG path clipping */}
                   <path id="textCurve" d="M 100,350 Q 900,50 1700,350" fill="transparent" />
                 </defs>
-                <text style={{ 
-                  fontFamily: 'var(--font-baloo), sans-serif', 
-                  fontSize: '85px', 
-                  fontWeight: 'bold',
-                  letterSpacing: '2px'
-                }}>
+                <text 
+                  style={{ 
+                    fontFamily: 'var(--font-baloo), sans-serif', 
+                    fontSize: `${titleFontSize}px`,
+                    fontWeight: 'bold',
+                    letterSpacing: '2px'
+                  }}
+                >
                   <textPath
                     href="#textCurve"
                     startOffset="50%"
                     textAnchor="middle"
                     fill={text_font_colour}
                     stroke="#FFFFFF"
-                    strokeWidth="15"
+                    strokeWidth={titleStrokeWidth}
                     strokeLinejoin="round"
                     style={{ paintOrder: 'stroke fill' }}
                   >
@@ -220,11 +244,11 @@ export default function Home() {
                   textAnchor="middle" 
                   fill={text_font_colour} 
                   stroke="#FFFFFF" 
-                  strokeWidth="5" 
+                  strokeWidth={subtitleStrokeWidth} 
                   strokeLinejoin="round"
                   style={{ 
                     fontFamily: 'var(--font-baloo), sans-serif', 
-                    fontSize: '35px', 
+                    fontSize: `${subtitleFontSize}px`, 
                     fontWeight: 'bold',
                     letterSpacing: '1px',
                     paintOrder: 'stroke fill'
@@ -238,11 +262,11 @@ export default function Home() {
                   textAnchor="middle" 
                   fill={text_font_colour} 
                   stroke="#FFFFFF" 
-                  strokeWidth="5" 
+                  strokeWidth={subtitleStrokeWidth} 
                   strokeLinejoin="round"
                   style={{ 
                     fontFamily: 'var(--font-baloo), sans-serif', 
-                    fontSize: '35px', 
+                    fontSize: `${subtitleFontSize}px`, 
                     fontWeight: 'bold',
                     letterSpacing: '1px',
                     paintOrder: 'stroke fill'
@@ -259,15 +283,16 @@ export default function Home() {
               style={{
                 position: 'absolute',
                 top: 320, // Snapped cleanly under the subtitle text
-                left: 0,
-                width: 1800,
+                left: (1800 - safeInternalWidth) / 2, // Centered tightly exactly to the viewport boundary
+                width: safeInternalWidth, // Pinches the form wrap boundary exactly to screen edge
                 zIndex: 52,
                 y: skyY, // Locked to the same group scroll
                 pointerEvents: 'none',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                gap: '20px',
+                flexWrap: 'wrap', // Auto-wraps button natively!
+                gap: '10px',
               }}
             >
               <input 
@@ -280,12 +305,12 @@ export default function Home() {
                   pointerEvents: 'auto',
                   backgroundColor: '#FFFFFF',
                   border: `4px solid ${text_font_colour}`,
-                  boxShadow: 'inset 7px 7px 0px #FFC528',
+                  boxShadow: `inset 7px 7px 0px #FFC528`,
                   borderRadius: '999px',
-                  width: '650px',
-                  height: '75px',
-                  padding: '0 40px',
-                  fontSize: '32px',
+                  width: `${inputWidth}px`,
+                  height: `${inputHeight}px`,
+                  padding: `0 ${inputPadding}px`,
+                  fontSize: `${inputFontSize}px`,
                   fontFamily: 'var(--font-baloo), sans-serif',
                   color: text_font_colour,
                   outline: 'none',
@@ -298,11 +323,11 @@ export default function Home() {
                 style={{
                   pointerEvents: 'auto',
                   backgroundColor: status === "success" ? "#FFC528" : text_font_colour,
-                  boxShadow: 'inset 7px 7px 0px #FFC528',
+                  boxShadow: `inset 7px 7px 0px #FFC528`,
                   borderRadius: '999px',
-                  height: '75px',
-                  padding: '0 50px',
-                  fontSize: '32px',
+                  height: `${inputHeight}px`,
+                  padding: `0 ${buttonPadding}px`,
+                  fontSize: `${inputFontSize}px`,
                   fontFamily: 'var(--font-baloo), sans-serif',
                   fontWeight: 'bold',
                   color: '#FFFFFF',
