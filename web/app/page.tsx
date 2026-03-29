@@ -1,22 +1,82 @@
+/* eslint-disable @next/next/no-img-element */
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 
-import FadeIn from "@/components/FadeIn";
-import HowItWorks from "@/components/HowItWorks";
-import VideoPlayer from "@/components/VideoPlayer";
-import WaitlistForm from "@/components/WaitlistForm";
-
 export default function Home() {
-  return (
-    <div className="min-h-screen font-sans bg-[rgb(200,240,209)] text-foreground selection:bg-accent-primary selection:text-white">
-      {/* Background Gradients */}
-      <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-900/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-pink-900/20 rounded-full blur-[120px]" />
-      </div>
+  const containerRef = useRef<HTMLDivElement>(null);
 
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#756281] border-b border-white/10">
+  // Email form state
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (res.ok) {
+        setStatus("success");
+        setEmail("");
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+
+    setTimeout(() => {
+      setStatus("idle");
+    }, 3000);
+  };
+
+  // Set up scroll progress tracking over the 300vh container
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  // Shared font styles
+  const text_font_colour = "#9E5BC8";
+
+  // Parallax translation speeds based on your list:
+  // Foreground (Fastest), Sky, Lake, Grassy Planes (Slowest)
+  const foregroundY = useTransform(scrollYProgress, [0, 1], [0, -1200]);
+  const skyY = useTransform(scrollYProgress, [0, 1], [0, -800]);
+  const lakeY = useTransform(scrollYProgress, [0, 1], [0, -200]);
+  const grassyY = useTransform(scrollYProgress, [0, 1], [0, -180]);
+
+  // Scale artboard accurately without distortion (recreates object-cover visually)
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    const updateScale = () => {
+      // The exact master artboard size from your SVGs
+      const artboardW = 1800;
+      const artboardH = 1200;
+      const scaleX = window.innerWidth / artboardW;
+      const scaleY = window.innerHeight / artboardH;
+      setScale(Math.max(scaleX, scaleY));
+    };
+    updateScale();
+    window.addEventListener("resize", updateScale);
+    return () => window.removeEventListener("resize", updateScale);
+  }, []);
+
+  return (
+    <div className="min-h-screen font-sans bg-[#C2F5FD] text-foreground selection:bg-accent-primary selection:text-white">
+
+      {/* Header (Retained from original) */}
+      {/*
+      <header className="fixed top-0 left-0 right-0 z-[100] bg-[#756281] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <Image
@@ -29,7 +89,6 @@ export default function Home() {
           </Link>
 
           <div className="flex items-center gap-4">
-
             <Link
               href="#waitlist-hero"
               className="px-5 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-gray-200 transition-all hover:scale-105 active:scale-95"
@@ -39,158 +98,243 @@ export default function Home() {
           </div>
         </div>
       </header>
+      */}
 
-      <main className="pt-20">
-        {/* Hero Section */}
-        <section id="waitlist-hero" className="w-full relative scroll-mt-20">
-            <div className="relative w-full">
-              {/* Background Image */}
-              <Image
-                src="/frontpageclear.png"
-                alt="Mewnie Interface Background"
-                width={0}
-                height={0}
-                sizes="100vw"
-                className="w-full h-auto object-contain"
-                priority
-                unoptimized
-              />
+      {/* Main Container for Parallax Graphic Scene */}
+      <main ref={containerRef} className="relative w-full h-[300vh]">
 
-              {/* Foreground Overlay Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-6 text-center md:-mt-12">
-                <FadeIn>
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#483556] tracking-tight drop-shadow-xl mb-3 md:mb-5">
-                    Making Health Fun
-                  </h1>
-                </FadeIn>
-                <FadeIn delay={0.1}>
-                  <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-[#362741] font-semibold max-w-xs sm:max-w-md md:max-w-2xl mb-6 md:mb-10 drop-shadow-lg leading-snug">
-                    Mewnie makes tracking health fun by turning your daily health habits into rewards. Be rewarded for your steps, sleep and exercise! You'll have a Pet which grows and evolves as you get healthier!
-                  </p>
-                </FadeIn>
-                <FadeIn delay={0.2} className="w-full max-w-xs sm:max-w-sm md:max-w-md">
-                  <WaitlistForm />
-                </FadeIn>
-              </div>
-            </div>
-        </section>
+        {/* Sticky viewport container keeps layers on screen during scroll */}
+        <div className="sticky top-0 w-full h-screen overflow-hidden bg-[#C2F5FD]">
 
-        {/* River Background Section */}
-        <section className="w-full relative">
-            <div className="relative w-full">
-              <Image
-                src="/secondpagefinal2.0.png"
-                alt="River Background"
-                width={0}
-                height={0}
-                sizes="100vw"
-                className="w-full h-auto object-contain"
-                unoptimized
-              />
-              <div className="absolute top-[54%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] aspect-video rounded-[3rem] overflow-hidden">
-                <VideoPlayer
-                  src="/Mewnie Product Video Actual.mov"
-                  className="w-full h-full"
-                />
-              </div>
-            </div>
-        </section>
+          {/* Master Artboard Container */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '1vh',
+              left: '50%',
+              width: '1800px',
+              height: '1200px',
+              transform: `translateX(-50%) scale(${scale})`,
+              transformOrigin: 'top center',
+              pointerEvents: 'none'
+            }}
+          >
+            {/* 1. Plain Background */}
+            <img
+              src="/plain_background.svg"
+              alt=""
+              style={{ position: 'absolute', left: 0, top: -9, width: 1800, height: 1200, zIndex: 0 }}
+            />
 
-        {/* How It Works Section */}
-        <HowItWorks />
+            {/* 2. Sky Components */}
+            <motion.img
+              src="/sky_components.svg"
+              alt=""
+              style={{ position: 'absolute', left: -0.5, top: -320.5, width: 1906, height: 2473, zIndex: 35, y: skyY }}
+            />
 
+            {/* 3. Grassy Planes (Slowest movement) */}
+            <motion.img
+              src="/grassy_planes.svg"
+              alt=""
+              style={{ position: 'absolute', left: -0.5, top: -150, width: 1823, height: 2036, zIndex: 10, y: grassyY }}
+            />
 
+            {/* 4. Lake */}
+            <motion.img
+              src="/lake.svg"
+              alt=""
+              style={{ position: 'absolute', left: 201.6, top: 259.5, width: 2751, height: 1286, zIndex: 30, y: lakeY }}
+            />
 
+            {/* 5. Foreground Component (Fastest movement) */}
+            <motion.img
+              src="/foreground_components.svg"
+              alt=""
+              style={{ position: 'absolute', left: 0, top: 450, width: 2144, height: 1992, zIndex: 40, y: foregroundY }}
+            />
 
-        {/* FAQ Section */}
-        <section id="faq" className="py-20 px-6 max-w-3xl mx-auto">
-          <FadeIn>
-            <h2 className="text-3xl md:text-4xl font-bold text-black mb-12 text-center">
-              Frequently Asked Questions
-            </h2>
-          </FadeIn>
-          <div className="space-y-4">
-            {[
-              {
-                q: "Is Mewnie free to use?",
-                a: "Yes! Completely free to use and there will be no features behind a paywall. Only cosmetics will be available for purchase.",
-              },
-              {
-                q: "Will there be other Mewnie's I can collect?",
-                a: "Yes! We are currently developing more Mewnies in the pipeline so you can collect and evolve your favourite one!",
-              },
-              {
-                q: "Can I use the app right now?",
-                a: "Unfortunately, the app is still currently in a closed beta but you can sign up below to join the waitlist! (Limited numbers)",
-              },
-              {
-                q: "What makes this app different from other apps?",
-                a: "Mewnie is different from other apps because it is a unique experience that allows you to collect and evolve your own Mewnies!",
-              },
-            ].map((item, i) => (
-              <FadeIn key={i} delay={i * 0.1}>
-                <details
-                  className="group glass rounded-xl border border-black/10 overflow-hidden"
+            {/* 6. Arched Title Text */}
+            <motion.div
+              style={{
+                position: 'absolute',
+                top: -80,
+                left: 0,
+                width: 1800,
+                height: 400,
+                zIndex: 50,
+                y: skyY, // Scroll it up with the sky so it feels rooted in the background
+                pointerEvents: 'none',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <svg width="1800" height="400" viewBox="0 0 1800 400" style={{ overflow: 'visible' }}>
+                <defs>
+                  {/* Expanded arch curve with plenty of length to prevent SVG path clipping */}
+                  <path id="textCurve" d="M 100,350 Q 900,50 1700,350" fill="transparent" />
+                </defs>
+                <text style={{ 
+                  fontFamily: 'var(--font-baloo), sans-serif', 
+                  fontSize: '85px', 
+                  fontWeight: 'bold',
+                  letterSpacing: '2px'
+                }}>
+                  <textPath
+                    href="#textCurve"
+                    startOffset="50%"
+                    textAnchor="middle"
+                    fill={text_font_colour}
+                    stroke="#FFFFFF"
+                    strokeWidth="15"
+                    strokeLinejoin="round"
+                    style={{ paintOrder: 'stroke fill' }}
+                  >
+                    Health has never been this fun
+                  </textPath>
+                </text>
+              </svg>
+            </motion.div>
+
+            {/* 7. Subtitle Text */}
+            <motion.div
+              style={{
+                position: 'absolute',
+                top: 150, // Comfortably nested right under the arch
+                left: 0,
+                width: 1800,
+                height: 200,
+                zIndex: 51,
+                y: skyY, // Links the parallax scrolling directly onto the sky's movement to match the title
+                pointerEvents: 'none',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <svg width="1800" height="200" viewBox="0 0 1800 200" style={{ overflow: 'visible' }}>
+                <text 
+                  x="50%" 
+                  y="70" 
+                  textAnchor="middle" 
+                  fill={text_font_colour} 
+                  stroke="#FFFFFF" 
+                  strokeWidth="5" 
+                  strokeLinejoin="round"
+                  style={{ 
+                    fontFamily: 'var(--font-baloo), sans-serif', 
+                    fontSize: '35px', 
+                    fontWeight: 'bold',
+                    letterSpacing: '1px',
+                    paintOrder: 'stroke fill'
+                  }}
                 >
-                  <summary className="flex items-center justify-between p-6 cursor-pointer hover:bg-black/5 transition-colors list-none">
-                    <span className="font-medium text-lg text-black">
-                      {item.q}
-                    </span>
-                    <span className="text-gray-600 group-open:rotate-180 transition-transform duration-300">
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M6 9l6 6 6-6" />
-                      </svg>
-                    </span>
-                  </summary>
-                  <div className="px-6 pb-6 pt-0 text-gray-700 leading-relaxed border-t border-black/5 mt-2">
-                    <p className="pt-4">{item.a}</p>
-                  </div>
-                </details>
-              </FadeIn>
-            ))}
+                  Stay consistent with better habits.
+                </text>
+                <text 
+                  x="50%" 
+                  y="120" 
+                  textAnchor="middle" 
+                  fill={text_font_colour} 
+                  stroke="#FFFFFF" 
+                  strokeWidth="5" 
+                  strokeLinejoin="round"
+                  style={{ 
+                    fontFamily: 'var(--font-baloo), sans-serif', 
+                    fontSize: '35px', 
+                    fontWeight: 'bold',
+                    letterSpacing: '1px',
+                    paintOrder: 'stroke fill'
+                  }}
+                >
+                  Collect and evolve your pets as you get healthier.
+                </text>
+              </svg>
+            </motion.div>
+
+            {/* 8. Email Input Box */}
+            <motion.form
+              onSubmit={handleSubscribe}
+              style={{
+                position: 'absolute',
+                top: 320, // Snapped cleanly under the subtitle text
+                left: 0,
+                width: 1800,
+                zIndex: 52,
+                y: skyY, // Locked to the same group scroll
+                pointerEvents: 'none',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '20px',
+              }}
+            >
+              <input 
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="enter your email..."
+                className="placeholder-[#ECD7FA] transition-transform hover:-translate-y-1 focus:scale-[1.02]"
+                style={{
+                  pointerEvents: 'auto',
+                  backgroundColor: '#FFFFFF',
+                  border: `4px solid ${text_font_colour}`,
+                  boxShadow: 'inset 7px 7px 0px #FFC528',
+                  borderRadius: '999px',
+                  width: '650px',
+                  height: '75px',
+                  padding: '0 40px',
+                  fontSize: '32px',
+                  fontFamily: 'var(--font-baloo), sans-serif',
+                  color: text_font_colour,
+                  outline: 'none',
+                }}
+              />
+              <button
+                type="submit"
+                disabled={status === "loading" || status === "success"}
+                className="transition-transform hover:-translate-y-1 active:scale-95 disabled:hover:translate-y-0 disabled:active:scale-100 disabled:opacity-80"
+                style={{
+                  pointerEvents: 'auto',
+                  backgroundColor: status === "success" ? "#FFC528" : text_font_colour,
+                  boxShadow: 'inset 7px 7px 0px #FFC528',
+                  borderRadius: '999px',
+                  height: '75px',
+                  padding: '0 50px',
+                  fontSize: '32px',
+                  fontFamily: 'var(--font-baloo), sans-serif',
+                  fontWeight: 'bold',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  cursor: status === "loading" || status === "success" ? 'default' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                {status === "loading" ? "..." : status === "success" ? "Done!" : "Join!"}
+              </button>
+            </motion.form>
           </div>
-        </section>
-
-        {/* CTA */}
-        <section className="py-20 px-6">
-            <div className="w-full max-w-5xl mx-auto relative rounded-3xl md:rounded-[3rem] overflow isolate flex flex-col justify-center items-center text-center py-17 px-4 md:py-32 transform-gpu [backface-visibility:hidden] [will-change:transform]">
-              <Image
-                src="/sleepyforest.png"
-                alt="Sleepy Forest"
-                fill
-                className="object-cover -z-10"
-                unoptimized
-                priority
-              />
-              <FadeIn>
-                <h2 className="text-2xl md:text-5xl font-bold text-white mb-4 md:mb-6 drop-shadow-lg">
-                  Join Mewnie Today
-                </h2>
-              </FadeIn>
-              
-              <FadeIn delay={0.1}>
-                <Link
-                  href="#waitlist-hero"
-                  className="px-8 py-4 mb-30 md:px-10 md:py-5 rounded-full bg-white text-black font-bold text-lg md:text-xl hover:bg-gray-100 transition-transform hover:scale-105 inline-block shadow-lg"
-                >
-                  Join waitlist
-                </Link>
-              </FadeIn>
-            </div>
-        </section>
+        </div>
       </main>
 
-      <footer className="border-t border-white/10 bg-black/20 py-12">
+      {/* Content Section below the graphics */}
+      <section className="relative z-50 bg-white min-h-[50vh] p-8 md:p-16 flex flex-col items-center border-t-8 border-[#756281]">
+        <h2 className="text-3xl md:text-5xl font-bold text-[#483556] mb-6 pt-16">
+          More updates coming soon!
+        </h2>
+        <p className="text-gray-500 text-lg md:text-xl text-center max-w-2xl">
+          Don't forget to keep an eye on your inbox 👀
+        </p>
+      </section>
+
+      {/* Footer (Retained from original) */}
+      <footer className="relative z-50 border-t border-white/10 bg-[#483556] py-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-xl font-bold text-white">mewnie</div>
-          <div className="flex gap-6 text-gray-400 text-sm">
+          <div className="flex gap-6 text-gray-300 text-sm">
             <Link href="/privacy" className="hover:text-white transition-colors">
               Privacy Policy
             </Link>
@@ -201,11 +345,12 @@ export default function Home() {
               Contact
             </Link>
           </div>
-          <div className="text-gray-500 text-sm">
+          <div className="text-gray-400 text-sm">
             © 2026 Mewnie Inc. All rights reserved.
           </div>
         </div>
       </footer>
+
     </div>
   );
 }

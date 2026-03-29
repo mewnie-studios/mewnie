@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 2751 1286" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-216.595875,-651.457956)">
+        <g id="lake" transform="matrix(1,0,0,1,15,-108)">
+            <g transform="matrix(1.117167,-0.101383,0.101838,1.122186,-786.98501,-202.688375)">
+                <ellipse cx="1966.5" cy="1601" rx="1226.5" ry="555" style="fill:rgb(156,98,51);"/>
+            </g>
+            <g transform="matrix(1.117167,-0.101383,0.101838,1.122186,-779.702058,-187.47721)">
+                <ellipse cx="1966.5" cy="1601" rx="1226.5" ry="555" style="fill:rgb(197,141,60);"/>
+            </g>
+            <g transform="matrix(1.097975,-0.128655,0.122702,1.04717,-784.260097,-12.299032)">
+                <clipPath id="_clip1">
+                    <ellipse cx="1966.5" cy="1601" rx="1226.5" ry="555"/>
+                </clipPath>
+                <g clip-path="url(#_clip1)">
+                    <ellipse cx="1966.5" cy="1601" rx="1226.5" ry="555" style="fill:rgb(77,255,210);"/>
+                    <clipPath id="_clip2">
+                        <ellipse cx="1966.5" cy="1601" rx="1226.5" ry="555"/>
+                    </clipPath>
+                    <g clip-path="url(#_clip2)">
+                        <g transform="matrix(0.685248,-0.109364,0.059459,0.409583,275.55717,803.940439)">
+                            <ellipse cx="1966.5" cy="1601" rx="1226.5" ry="555" style="fill:rgb(77,214,255);"/>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
