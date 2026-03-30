@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { Analytics } from "@vercel/analytics/next"
 import Link from "next/link";
 import Image from "next/image";
 
@@ -111,7 +112,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen font-sans bg-[#C2F5FD] text-foreground selection:bg-accent-primary selection:text-white">
-
+      <Analytics />
       {/* Header (Retained from original) */}
       {/*
       <header className="fixed top-0 left-0 right-0 z-[100] bg-[#756281] border-b border-white/10">
