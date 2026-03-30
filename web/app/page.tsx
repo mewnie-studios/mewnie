@@ -276,7 +276,8 @@ export default function Home() {
                   `
                 }}
               >
-                What if getting healthy felt like a game? Mewnie turns your real-life habits into in-game progress. Drink water, go for a walk, even get good sleep to collect and evolve adorable pets.
+                Stay consistent with better habits. 
+                Collect and evolve your pets as you get healthier 
               </div>
             </motion.div>
 
