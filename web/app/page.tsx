@@ -2,12 +2,28 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 
+const pets = [
+  { name: "Slimey", image: "/slime_pet.png" },
+  { name: "Sprouty", image: "/sprout_pet.png" },
+  { name: "Draggy", image: "/dragon_pet.png" }
+];
+
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Pet Carousel State
+  const [activePetIndex, setActivePetIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActivePetIndex((prev) => (prev + 1) % pets.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Email form state
   const [email, setEmail] = useState("");
@@ -83,7 +99,7 @@ export default function Home() {
 
   // Subtitle shrinks far less gracefully (caps heavily so it doesn't get unreadable)
   const subtitleScale = Math.min(1, (0.95 * safeInternalWidth) / 1000);
-  const subtitleFontSize = Math.max(22, 35 * subtitleScale);
+  const subtitleFontSize = Math.max(28, 35 * subtitleScale);
   const subtitleStrokeWidth = Math.max(3, 5 * subtitleScale);
 
   // Form controls stay strictly large, snapping to wrap exactly on screen borders
@@ -173,14 +189,14 @@ export default function Home() {
             <motion.img
               src="/foreground_components.svg"
               alt=""
-              style={{ position: 'absolute', left: 0, top: 450, width: 2144, height: 1992, zIndex: 40, y: foregroundY }}
+              style={{ position: 'absolute', left: 0, top: 550, width: 2144, height: 1992, zIndex: 40, y: foregroundY }}
             />
 
             {/* 6. Arched Title Text */}
             <motion.div
               style={{
                 position: 'absolute',
-                top: -80,
+                top: -10,
                 left: 0,
                 width: 1800,
                 height: 400,
@@ -225,9 +241,9 @@ export default function Home() {
             <motion.div
               style={{
                 position: 'absolute',
-                top: 150, // Comfortably nested right under the arch
-                left: 0,
-                width: 1800,
+                top: 250, // Lowered to not overlap with the title above
+                left: (1800 - safeInternalWidth) / 2, // Centered exactly to the viewport boundary
+                width: safeInternalWidth,
                 height: 200,
                 zIndex: 51,
                 y: skyY, // Links the parallax scrolling directly onto the sky's movement to match the title
@@ -235,46 +251,33 @@ export default function Home() {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
+                padding: '0 20px',
               }}
             >
-              <svg width="1800" height="200" viewBox="0 0 1800 200" style={{ overflow: 'visible' }}>
-                <text 
-                  x="50%" 
-                  y="70" 
-                  textAnchor="middle" 
-                  fill={text_font_colour} 
-                  stroke="#FFFFFF" 
-                  strokeWidth={subtitleStrokeWidth} 
-                  strokeLinejoin="round"
-                  style={{ 
-                    fontFamily: 'var(--font-baloo), sans-serif', 
-                    fontSize: `${subtitleFontSize}px`, 
-                    fontWeight: 'bold',
-                    letterSpacing: '1px',
-                    paintOrder: 'stroke fill'
-                  }}
-                >
-                  Stay consistent with better habits.
-                </text>
-                <text 
-                  x="50%" 
-                  y="120" 
-                  textAnchor="middle" 
-                  fill={text_font_colour} 
-                  stroke="#FFFFFF" 
-                  strokeWidth={subtitleStrokeWidth} 
-                  strokeLinejoin="round"
-                  style={{ 
-                    fontFamily: 'var(--font-baloo), sans-serif', 
-                    fontSize: `${subtitleFontSize}px`, 
-                    fontWeight: 'bold',
-                    letterSpacing: '1px',
-                    paintOrder: 'stroke fill'
-                  }}
-                >
-                  Collect and evolve your pets as you get healthier.
-                </text>
-              </svg>
+              <div 
+                style={{ 
+                  fontFamily: 'var(--font-baloo), sans-serif', 
+                  fontSize: `${subtitleFontSize}px`, 
+                  fontWeight: 'bold',
+                  letterSpacing: '1px',
+                  color: text_font_colour,
+                  textAlign: 'center',
+                  lineHeight: '1.4',
+                  maxWidth: '1200px',
+                  textShadow: `
+                    -${subtitleStrokeWidth}px -${subtitleStrokeWidth}px 0 #FFFFFF,
+                     ${subtitleStrokeWidth}px -${subtitleStrokeWidth}px 0 #FFFFFF,
+                    -${subtitleStrokeWidth}px  ${subtitleStrokeWidth}px 0 #FFFFFF,
+                     ${subtitleStrokeWidth}px  ${subtitleStrokeWidth}px 0 #FFFFFF,
+                     0px -${subtitleStrokeWidth}px 0 #FFFFFF,
+                     0px  ${subtitleStrokeWidth}px 0 #FFFFFF,
+                    -${subtitleStrokeWidth}px 0px 0 #FFFFFF,
+                     ${subtitleStrokeWidth}px 0px 0 #FFFFFF
+                  `
+                }}
+              >
+                What if getting healthy felt like a game? Mewnie turns your real-life habits into in-game progress. Drink water, go for a walk, even get good sleep to collect and evolve adorable pets.
+              </div>
             </motion.div>
 
             {/* 8. Email Input Box */}
@@ -282,7 +285,7 @@ export default function Home() {
               onSubmit={handleSubscribe}
               style={{
                 position: 'absolute',
-                top: 320, // Snapped cleanly under the subtitle text
+                top: 450, // Lowered appropriately to sit under the description
                 left: (1800 - safeInternalWidth) / 2, // Centered tightly exactly to the viewport boundary
                 width: safeInternalWidth, // Pinches the form wrap boundary exactly to screen edge
                 zIndex: 52,
@@ -299,7 +302,7 @@ export default function Home() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="enter your email..."
+                placeholder="Enter your email..."
                 className="placeholder-[#ECD7FA] transition-transform hover:-translate-y-1 focus:scale-[1.02]"
                 style={{
                   pointerEvents: 'auto',
@@ -338,7 +341,7 @@ export default function Home() {
                   justifyContent: 'center'
                 }}
               >
-                {status === "loading" ? "..." : status === "success" ? "Done!" : "Join!"}
+                {status === "loading" ? "..." : status === "success" ? "Done!" : "Join Waitlist!"}
               </button>
             </motion.form>
           </div>
@@ -346,13 +349,68 @@ export default function Home() {
       </main>
 
       {/* Content Section below the graphics */}
-      <section className="relative z-50 bg-white min-h-[50vh] p-8 md:p-16 flex flex-col items-center border-t-8 border-[#756281]">
-        <h2 className="text-3xl md:text-5xl font-bold text-[#483556] mb-6 pt-16">
-          More updates coming soon!
+      <section className="relative z-50 bg-[#F4FAFC] min-h-[70vh] p-8 md:p-16 flex flex-col items-center border-t-8 border-[#756281]">
+        <h2 className="text-3xl md:text-5xl font-bold text-[#483556] mb-12 pt-8 text-center" style={{ fontFamily: 'var(--font-baloo), sans-serif' }}>
+          Meet Your Future Companions
         </h2>
-        <p className="text-gray-500 text-lg md:text-xl text-center max-w-2xl">
-          Don't forget to keep an eye on your inbox 👀
-        </p>
+        
+        <div className="relative w-full max-w-5xl overflow-hidden flex flex-col items-center justify-center pt-8 pb-4">
+          <div className="relative h-[380px] md:h-[450px] w-full flex items-center justify-center">
+            {pets.map((pet, i) => {
+              const offset = ((i - activePetIndex + pets.length) % pets.length);
+              let normalizedOffset = offset;
+              if (normalizedOffset > Math.floor(pets.length / 2)) {
+                normalizedOffset -= pets.length;
+              }
+
+              const isCenter = normalizedOffset === 0;
+
+              return (
+                <motion.div
+                  key={pet.name}
+                  animate={{
+                    x: `${normalizedOffset * 95}%`,
+                    scale: isCenter ? 1 : 0.65,
+                    opacity: isCenter ? 1 : 0.4,
+                    zIndex: isCenter ? 10 : 5,
+                  }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="absolute flex flex-col items-center cursor-pointer"
+                  onClick={() => setActivePetIndex(i)}
+                >
+                  <div className={`w-56 h-56 md:w-80 md:h-80 relative rounded-full overflow-hidden border-8 border-white shadow-xl mb-4 bg-[#E6F3F5] transition-transform duration-300 ${isCenter ? 'hover:scale-105' : ''}`}>
+                    <Image
+                      src={pet.image}
+                      alt={pet.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <h3 
+                    className={`text-3xl md:text-4xl font-black text-[#9E5BC8] tracking-wide transition-opacity duration-300 ${isCenter ? 'opacity-100' : 'opacity-0'}`} 
+                    style={{ fontFamily: 'var(--font-baloo), sans-serif', textShadow: '2px 2px 0px #FFFFFF' }}
+                  >
+                    {pet.name}
+                  </h3>
+                </motion.div>
+              );
+            })}
+          </div>
+          
+          {/* Carousel dots */}
+          <div className="flex gap-4 justify-center mt-2">
+            {pets.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActivePetIndex(i)}
+                className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                  i === activePetIndex ? "bg-[#FFC528] scale-125 shadow-sm" : "bg-gray-300 hover:bg-gray-400"
+                }`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Footer (Retained from original) */}
