@@ -192,6 +192,9 @@ export default function Home() {
               style={{ position: 'absolute', left: 0, top: 550, width: 2144, height: 1992, zIndex: 40, y: foregroundY }}
             />
 
+            {/* Commented out for now */}
+            {false && (
+            <>
             {/* 6. Arched Title Text */}
             <motion.div
               style={{
@@ -345,6 +348,8 @@ export default function Home() {
                 {status === "loading" ? "..." : status === "success" ? "Done!" : "Join Waitlist!"}
               </button>
             </motion.form>
+            </>
+            )}
           </div>
         </div>
       </main>
