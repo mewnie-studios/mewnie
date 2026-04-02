@@ -299,7 +299,7 @@ export default function Home() {
                 style={{
                   pointerEvents: 'auto',
                   // backgroundColor: '#FFFFFF',
-                  backgroundColor: 'rgba(255,255,255,0.85)',
+                  backgroundColor: 'rgba(255,255,255)',
                   border: `1.5px solid ${text_font_colour}`,
                   boxShadow: `inset 4px 4px 0px #FFC528`,
                   borderRadius: '30px',
