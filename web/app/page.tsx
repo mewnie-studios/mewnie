@@ -52,6 +52,7 @@ export default function Home() {
   // Foreground (Fastest), Sky, Lake, Grassy Planes (Slowest)
   const foregroundY = useTransform(scrollYProgress, [0, 1], [0, -1200]);
   const skyY = useTransform(scrollYProgress, [0, 1], [0, -800]);
+  const uiY = useTransform(scrollYProgress, [0, 1], [0, -950]); // Slightly faster than sky
   const lakeY = useTransform(scrollYProgress, [0, 1], [0, -200]);
   const grassyY = useTransform(scrollYProgress, [0, 1], [0, -180]);
 
@@ -80,24 +81,24 @@ export default function Home() {
 
   // Subtitle shrinks gracefully to keep text bound neatly within the card
   const subtitleScale = Math.min(1, (0.95 * safeInternalWidth) / 1000);
-  const subtitleFontSize = Math.max(20, 26 * subtitleScale);
+  const subtitleFontSize = Math.max(35, 26 * subtitleScale);
 
   // Card background responsive wrap to securely space it off the edges
-  const cardWidth = Math.min(700, safeInternalWidth - 40);
+  const cardWidth = Math.min(1000, safeInternalWidth - 40);
   const cardPadding = safeInternalWidth < 600 ? 20 : 12;
 
   // Form controls stay strictly large, snapping to wrap exactly on screen borders
   const inputWidth = Math.min(650, safeInternalWidth - 40);
-  const inputHeight = safeInternalWidth < 800 ? 44 : 52;
+  const inputHeight = safeInternalWidth < 800 ? 55 : 52;
   const inputFontSize = windowWidth < 768 ? 25 : 25;
   const inputPadding = 40;
   const buttonPadding = 50;
 
   // Gradually push the foreground and UI layers down as the screen squishes layout
   const squishFactor = Math.max(0, Math.min(1, (1500 - safeInternalWidth) / 600));
-  const foregroundTop = 430 + (130 * squishFactor);
+  const foregroundTop = 540 + (140 * squishFactor);
   const textTop = 100 + (80 * squishFactor);
-  const formTop = 350 + (80 * squishFactor);
+  const formTop = 400 + (100 * squishFactor);
 
   return (
     <div className="min-h-screen font-sans bg-[#C2F5FD] text-foreground selection:bg-accent-primary selection:text-white">
@@ -201,7 +202,7 @@ export default function Home() {
                 width: 1800,
                 height: 280,
                 zIndex: 51,
-                y: skyY, // Scroll it up with the sky so it feels rooted in the background
+                y: uiY, // Scrolls faster than the sky
                 pointerEvents: 'none',
                 display: 'flex',
                 justifyContent: 'center',
@@ -228,7 +229,7 @@ export default function Home() {
                   style={{
                     fontFamily: 'var(--font-jakarta), sans-serif',
                     fontWeight: 780,
-                    fontSize: 'clamp(36px, 5vw, 40px)',
+                    fontSize: 'clamp(50px, 5vw, 55px)',
                     lineHeight: '1.1',
                     letterSpacing: '-0.02em',
                     color: text_font_colour,
@@ -241,7 +242,7 @@ export default function Home() {
                   Watch your pet thrive.
                 </h1>
 
-                <div style={{ textAlign: 'center' }}>
+                <div style={{ textAlign: 'center', padding: windowWidth < 768 ? '0 40px' : '0' }}>
                   {/* <p 
                     style={{ 
                       fontFamily: 'var(--font-jakarta), sans-serif', 
@@ -254,10 +255,10 @@ export default function Home() {
                   >
                     Stay consistent with better habits.
                   </p> */}
-                  <p 
-                    style={{ 
-                      fontFamily: 'var(--font-jakarta), sans-serif', 
-                      fontSize: `${subtitleFontSize}px`, 
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-jakarta), sans-serif',
+                      fontSize: `${subtitleFontSize}px`,
                       fontWeight: 780,
                       letterSpacing: '1px',
                       color: text_font_colour,
@@ -280,7 +281,7 @@ export default function Home() {
                 left: (1800 - safeInternalWidth) / 2, // Centered tightly exactly to the viewport boundary
                 width: safeInternalWidth, // Pinches the form wrap boundary exactly to screen edge
                 zIndex: 52,
-                y: skyY, // Locked to the same group scroll
+                y: uiY, // Scrolls faster than the sky
                 pointerEvents: 'none',
                 display: 'flex',
                 flexDirection: safeInternalWidth < 800 ? 'column' : 'row',
@@ -302,12 +303,13 @@ export default function Home() {
                   border: `1.5px solid ${text_font_colour}`,
                   boxShadow: `inset 4px 4px 0px #FFC528`,
                   borderRadius: '30px',
-                  width: '30%',
-                  minWidth: 'min(320px, 100%)', // Locks the box to a fixed minimum size so it stops squishing on mobile
-                  height: `${inputHeight}px`,
+                  width: safeInternalWidth < 800 ? '60%' : '30%',
+                  maxWidth: '500px',
+                  minWidth: 'min(300px, 100%)', // Locks the box to a fixed minimum size so it stops squishing on mobile
+                  height: `60px`,
                   padding: `0 ${inputPadding}px`,
                   // fontSize: `${inputFontSize}px`,
-                  fontSize: `${20 - (4 * squishFactor)}px`,
+                  fontSize: `${30 - (4 * squishFactor)}px`,
                   fontFamily: 'var(--font-jakarta), sans-serif',
                   color: text_font_colour,
                   outline: 'none',
@@ -322,12 +324,12 @@ export default function Home() {
                   backgroundColor: status === "success" ? "#FFC528" : text_font_colour,
                   boxShadow: `inset 4px 4px 0px #FFC528`,
                   borderRadius: '30px',
-                  width: safeInternalWidth < 800 ? '240px' : 'auto', // Visually shorter than the input box above it
-                  height: `${inputHeight}px`,
+                  width: safeInternalWidth < 800 ? '300px' : 'auto', // Visually shorter than the input box above it
+                  height: `70px`,
                   // padding: `0 ${buttonPadding}px`,
                   padding: `0 30px`,
                   // fontSize: `${inputFontSize}px`,
-                  fontSize: `${20 - (4 * squishFactor)}px`,
+                  fontSize: `${Math.max(35, 20 - (4 * squishFactor))}px`,
                   fontFamily: 'var(--font-jakarta), sans-serif',
                   fontWeight: 'bold',
                   color: '#FFFFFF',
