@@ -79,9 +79,13 @@ export default function Home() {
 
   // Title text uses standard HTML sizing now
 
+  // Prevent elements from ballooning to massive physical sizes on very large monitors (like iMac)
+  // Max physical render scale is locked to match the size on standard 14" MacBooks
+  const imacAntiScale = scale > 0.85 ? (0.85 / scale) : 1;
+
   // Subtitle shrinks gracefully to keep text bound neatly within the card
   const subtitleScale = Math.min(1, (0.95 * safeInternalWidth) / 1000);
-  const subtitleFontSize = Math.max(35, 26 * subtitleScale);
+  const subtitleFontSize = Math.max(35, 26 * subtitleScale) * imacAntiScale;
 
   // Card background responsive wrap to securely space it off the edges
   const cardWidth = Math.min(1000, safeInternalWidth - 40);
@@ -229,7 +233,7 @@ export default function Home() {
                   style={{
                     fontFamily: 'var(--font-jakarta), sans-serif',
                     fontWeight: 780,
-                    fontSize: 'clamp(50px, 5vw, 55px)',
+                    fontSize: `${55 * imacAntiScale}px`,
                     lineHeight: '1.1',
                     letterSpacing: '-0.02em',
                     color: text_font_colour,
@@ -304,12 +308,12 @@ export default function Home() {
                   boxShadow: `inset 4px 4px 0px #FFC528`,
                   borderRadius: '30px',
                   width: safeInternalWidth < 800 ? '60%' : '30%',
-                  maxWidth: '500px',
-                  minWidth: 'min(300px, 100%)', // Locks the box to a fixed minimum size so it stops squishing on mobile
-                  height: `60px`,
-                  padding: `0 ${inputPadding}px`,
+                  maxWidth: `${500 * imacAntiScale}px`,
+                  minWidth: `min(${300 * imacAntiScale}px, 100%)`, // Locks the box to a fixed minimum size so it stops squishing on mobile
+                  height: `${60 * imacAntiScale}px`,
+                  padding: `0 ${inputPadding * imacAntiScale}px`,
                   // fontSize: `${inputFontSize}px`,
-                  fontSize: `${30 - (4 * squishFactor)}px`,
+                  fontSize: `${(30 - (4 * squishFactor)) * imacAntiScale}px`,
                   fontFamily: 'var(--font-jakarta), sans-serif',
                   color: text_font_colour,
                   outline: 'none',
@@ -324,12 +328,12 @@ export default function Home() {
                   backgroundColor: status === "success" ? "#FFC528" : text_font_colour,
                   boxShadow: `inset 4px 4px 0px #FFC528`,
                   borderRadius: '30px',
-                  width: safeInternalWidth < 800 ? '300px' : 'auto', // Visually shorter than the input box above it
-                  height: `70px`,
+                  width: safeInternalWidth < 800 ? `${300 * imacAntiScale}px` : 'auto', // Visually shorter than the input box above it
+                  height: `${70 * imacAntiScale}px`,
                   // padding: `0 ${buttonPadding}px`,
-                  padding: `0 30px`,
+                  padding: `0 ${30 * imacAntiScale}px`,
                   // fontSize: `${inputFontSize}px`,
-                  fontSize: `${Math.max(35, 20 - (4 * squishFactor))}px`,
+                  fontSize: `${Math.max(35, 20 - (4 * squishFactor)) * imacAntiScale}px`,
                   fontFamily: 'var(--font-jakarta), sans-serif',
                   fontWeight: 'bold',
                   color: '#FFFFFF',
@@ -346,16 +350,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      {/* Content Section below the graphics */}
-      <section className="relative z-50 bg-white min-h-[50vh] p-8 md:p-16 flex flex-col items-center border-t-8 border-[#756281]">
-        <h2 className="text-3xl md:text-5xl font-bold text-[#483556] mb-6 pt-16">
-          More updates coming soon!
-        </h2>
-        <p className="text-gray-500 text-lg md:text-xl text-center max-w-2xl">
-          Don't forget to keep an eye on your inbox 👀
-        </p>
-      </section>
 
       {/* Footer (Retained from original) */}
       <footer className="relative z-50 border-t border-white/10 bg-[#483556] py-12">
