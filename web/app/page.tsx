@@ -63,12 +63,13 @@ export default function Home() {
   });
 
   // Shared font styles
-  const text_font_colour = "#9E5BC8";
+  const text_font_colour = "#4a1d5eff";
 
   // Parallax translation speeds based on your list:
   // Foreground (Fastest), Sky, Lake, Grassy Planes (Slowest)
   const foregroundY = useTransform(scrollYProgress, [0, 1], [0, -1200]);
   const skyY = useTransform(scrollYProgress, [0, 1], [0, -800]);
+  const uiY = useTransform(scrollYProgress, [0, 1], [0, -950]); // Slightly faster than sky
   const lakeY = useTransform(scrollYProgress, [0, 1], [0, -200]);
   const grassyY = useTransform(scrollYProgress, [0, 1], [0, -180]);
 
@@ -92,52 +93,39 @@ export default function Home() {
 
   // Calculate the visible width of the artboard in its internal coordinates.
   const safeInternalWidth = scale > 0 ? (windowWidth / scale) : 1800;
-  
-  // Title stays rigorously constrained (1350px full footprint)
-  const titleUiScale = Math.min(1, (0.95 * safeInternalWidth) / 1350);
-  const titleFontSize = 85 * titleUiScale;
-  const titleStrokeWidth = 15 * titleUiScale;
 
-  // Subtitle shrinks far less gracefully (caps heavily so it doesn't get unreadable)
+  // Title text uses standard HTML sizing now
+
+  // Prevent elements from ballooning to massive physical sizes on very large monitors (like iMac)
+  // Max physical render scale is locked to match the size on standard 14" MacBooks
+  const imacAntiScale = scale > 0.85 ? (0.85 / scale) : 1;
+
+  // Subtitle shrinks gracefully to keep text bound neatly within the card
   const subtitleScale = Math.min(1, (0.95 * safeInternalWidth) / 1000);
-  const subtitleFontSize = Math.max(28, 35 * subtitleScale);
-  const subtitleStrokeWidth = Math.max(3, 5 * subtitleScale);
+  const subtitleFontSize = Math.max(35, 26 * subtitleScale) * imacAntiScale;
+
+  // Card background responsive wrap to securely space it off the edges
+  const cardWidth = Math.min(1000, safeInternalWidth - 40);
+  const cardPadding = safeInternalWidth < 600 ? 20 : 12;
 
   // Form controls stay strictly large, snapping to wrap exactly on screen borders
   const inputWidth = Math.min(650, safeInternalWidth - 40);
-  const inputHeight = windowWidth < 768 ? 60 : 75;
-  const inputFontSize = windowWidth < 768 ? 25 :32;
+  const inputHeight = safeInternalWidth < 800 ? 55 : 52;
+  const inputFontSize = windowWidth < 768 ? 25 : 25;
   const inputPadding = 40;
   const buttonPadding = 50;
 
+  // Gradually push the foreground and UI layers down as the screen squishes layout
+  const squishFactor = Math.max(0, Math.min(1, (1500 - safeInternalWidth) / 600));
+  const foregroundTop = 540 + (140 * squishFactor);
+  const textTop = 100 + (80 * squishFactor);
+  const formTop = 400 + (100 * squishFactor);
+
   return (
     <div className="min-h-screen font-sans bg-[#C2F5FD] text-foreground selection:bg-accent-primary selection:text-white">
-      <Analytics />
-      {/* Header (Retained from original) */}
-      {/*
-      <header className="fixed top-0 left-0 right-0 z-[100] bg-[#756281] border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="hover:opacity-80 transition-opacity">
-            <Image
-              src="/gemini logo.png"
-              alt="Gemini logo"
-              width={60}
-              height={20}
-              className="object-contain"
-            />
-          </Link>
 
-          <div className="flex items-center gap-4">
-            <Link
-              href="#waitlist-hero"
-              className="px-5 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-gray-200 transition-all hover:scale-105 active:scale-95"
-            >
-              Join waitlist
-            </Link>
-          </div>
-        </div>
-      </header>
-      */}
+
+
 
       {/* Main Container for Parallax Graphic Scene */}
       <main ref={containerRef} className="relative w-full h-[300vh]">
@@ -172,6 +160,39 @@ export default function Home() {
               style={{ position: 'absolute', left: -0.5, top: -320.5, width: 1906, height: 2473, zIndex: 35, y: skyY }}
             />
 
+            {/* Logo attached to sky so it scrolls away organically */}
+            <motion.div
+              style={{
+                position: 'absolute',
+                top: 20,
+                left: (1800 - safeInternalWidth) / 2 + 40, // Keeps it pinned to the screen's edge even when squished!
+                zIndex: 55, // above sky
+                y: skyY,
+                pointerEvents: 'auto', // so it can be clicked
+              }}
+            >
+              <Link href="/" className="hover:opacity-80 transition-opacity flex items-center gap-4">
+                {/* <Image
+                  src="/gemini logo.png"
+                  alt="Mewnie logo"
+                  width={90}
+                  height={50}
+                  className="object-contain"
+                /> */}
+                <span
+                  style={{
+                    fontFamily: 'var(--font-jakarta), sans-serif',
+                    fontSize: `${30 - (8 * squishFactor)}px`,
+                    fontWeight: 'bold',
+                    color: text_font_colour,
+                    letterSpacing: '1px'
+                  }}
+                >
+                  Mewnie
+                </span>
+              </Link>
+            </motion.div>
+
             {/* 3. Grassy Planes (Slowest movement) */}
             <motion.img
               src="/grassy_planes.svg"
@@ -190,136 +211,127 @@ export default function Home() {
             <motion.img
               src="/foreground_components.svg"
               alt=""
-              style={{ position: 'absolute', left: 0, top: 550, width: 2144, height: 1992, zIndex: 40, y: foregroundY }}
+              style={{ position: 'absolute', left: 0, top: foregroundTop, width: 2144, height: 1992, zIndex: 40, y: foregroundY }}
             />
 
-            {/* Commented out for now */}
-            {false && (
-            <>
-            {/* 6. Arched Title Text */}
+            {/* 6. Title and Subtitle Text */}
             <motion.div
               style={{
                 position: 'absolute',
-                top: -10,
+                top: textTop,
                 left: 0,
                 width: 1800,
-                height: 400,
-                zIndex: 50,
-                y: skyY, // Scroll it up with the sky so it feels rooted in the background
-                pointerEvents: 'none',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <svg width="1800" height="400" viewBox="0 0 1800 400" style={{ overflow: 'visible' }}>
-                <defs>
-                  {/* Expanded arch curve with plenty of length to prevent SVG path clipping */}
-                  <path id="textCurve" d="M 100,350 Q 900,50 1700,350" fill="transparent" />
-                </defs>
-                <text 
-                  style={{ 
-                    fontFamily: 'var(--font-baloo), sans-serif', 
-                    fontSize: `${titleFontSize}px`,
-                    fontWeight: 'bold',
-                    letterSpacing: '2px'
-                  }}
-                >
-                  <textPath
-                    href="#textCurve"
-                    startOffset="50%"
-                    textAnchor="middle"
-                    fill={text_font_colour}
-                    stroke="#FFFFFF"
-                    strokeWidth={titleStrokeWidth}
-                    strokeLinejoin="round"
-                    style={{ paintOrder: 'stroke fill' }}
-                  >
-                    Health has never been this fun
-                  </textPath>
-                </text>
-              </svg>
-            </motion.div>
-
-            {/* 7. Subtitle Text */}
-            <motion.div
-              style={{
-                position: 'absolute',
-                top: 250, // Lowered to not overlap with the title above
-                left: (1800 - safeInternalWidth) / 2, // Centered exactly to the viewport boundary
-                width: safeInternalWidth,
-                height: 200,
+                height: 280,
                 zIndex: 51,
-                y: skyY, // Links the parallax scrolling directly onto the sky's movement to match the title
+                y: uiY, // Scrolls faster than the sky
                 pointerEvents: 'none',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                padding: '0 20px',
               }}
             >
-              <div 
-                style={{ 
-                  fontFamily: 'var(--font-baloo), sans-serif', 
-                  fontSize: `${subtitleFontSize}px`, 
-                  fontWeight: 'bold',
-                  letterSpacing: '1px',
-                  color: text_font_colour,
-                  textAlign: 'center',
-                  lineHeight: '1.4',
-                  maxWidth: '1200px',
-                  textShadow: `
-                    -${subtitleStrokeWidth}px -${subtitleStrokeWidth}px 0 #FFFFFF,
-                     ${subtitleStrokeWidth}px -${subtitleStrokeWidth}px 0 #FFFFFF,
-                    -${subtitleStrokeWidth}px  ${subtitleStrokeWidth}px 0 #FFFFFF,
-                     ${subtitleStrokeWidth}px  ${subtitleStrokeWidth}px 0 #FFFFFF,
-                     0px -${subtitleStrokeWidth}px 0 #FFFFFF,
-                     0px  ${subtitleStrokeWidth}px 0 #FFFFFF,
-                    -${subtitleStrokeWidth}px 0px 0 #FFFFFF,
-                     ${subtitleStrokeWidth}px 0px 0 #FFFFFF
-                  `
+              <div
+                style={{
+                  // background: 'rgba(0, 0 ,0,0.05)',
+                  // background: 'linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0.3))',
+                  // backdropFilter: 'blur(8px)',
+                  // borderRadius: '24px',
+                  // border: '1px solid rgba(255,255,255,0.2)',
+                  padding: `${cardPadding}px`,
+                  width: `${cardWidth}px`,
+                  margin: '0 auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '24px'
                 }}
               >
-                Stay consistent with better habits. 
-                Collect and evolve your pets as you get healthier 
+                <h1
+                  style={{
+                    fontFamily: 'var(--font-jakarta), sans-serif',
+                    fontWeight: 780,
+                    fontSize: `${55 * imacAntiScale}px`,
+                    lineHeight: '1.1',
+                    letterSpacing: '-0.02em',
+                    color: text_font_colour,
+                    textAlign: 'center',
+                    margin: 0
+                  }}
+                >
+                  Build healthy habits.
+                  <br />
+                  Watch your pet thrive.
+                </h1>
+
+                <div style={{ textAlign: 'center', padding: windowWidth < 768 ? '0 40px' : '0' }}>
+                  {/* <p 
+                    style={{ 
+                      fontFamily: 'var(--font-jakarta), sans-serif', 
+                      fontSize: `${subtitleFontSize}px`, 
+                      fontWeight: 'bold',
+                      letterSpacing: '1px',
+                      color: text_font_colour,
+                      margin: '0 0 1px 0'
+                    }}
+                  >
+                    Stay consistent with better habits.
+                  </p> */}
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-jakarta), sans-serif',
+                      fontSize: `${subtitleFontSize}px`,
+                      fontWeight: 780,
+                      letterSpacing: '1px',
+                      color: text_font_colour,
+                      margin: 0
+                    }}
+                  >
+                    Stay consistent, collect and evolve your pets.
+                  </p>
+                </div>
               </div>
             </motion.div>
+
 
             {/* 8. Email Input Box */}
             <motion.form
               onSubmit={handleSubscribe}
               style={{
                 position: 'absolute',
-                top: 450, // Lowered appropriately to sit under the description
+                top: formTop, // Gradually drops with the squish factor
                 left: (1800 - safeInternalWidth) / 2, // Centered tightly exactly to the viewport boundary
                 width: safeInternalWidth, // Pinches the form wrap boundary exactly to screen edge
                 zIndex: 52,
-                y: skyY, // Locked to the same group scroll
+                y: uiY, // Scrolls faster than the sky
                 pointerEvents: 'none',
                 display: 'flex',
+                flexDirection: safeInternalWidth < 800 ? 'column' : 'row',
                 justifyContent: 'center',
                 alignItems: 'center',
-                flexWrap: 'wrap', // Auto-wraps button natively!
-                gap: '10px',
+                gap: safeInternalWidth < 800 ? '20px' : '15px',
               }}
             >
-              <input 
+              <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email..."
-                className="placeholder-[#ECD7FA] transition-transform hover:-translate-y-1 focus:scale-[1.02]"
+                placeholder="enter your email..."
+                className="placeholder-[#602c77]/80 transition-transform hover:-translate-y-1 focus:scale-[1.02]"
                 style={{
                   pointerEvents: 'auto',
-                  backgroundColor: '#FFFFFF',
-                  border: `4px solid ${text_font_colour}`,
-                  boxShadow: `inset 7px 7px 0px #FFC528`,
-                  borderRadius: '999px',
-                  width: `${inputWidth}px`,
-                  height: `${inputHeight}px`,
-                  padding: `0 ${inputPadding}px`,
-                  fontSize: `${inputFontSize}px`,
-                  fontFamily: 'var(--font-baloo), sans-serif',
+                  // backgroundColor: '#FFFFFF',
+                  backgroundColor: 'rgba(255,255,255)',
+                  border: `1.5px solid ${text_font_colour}`,
+                  boxShadow: `inset 4px 4px 0px #FFC528`,
+                  borderRadius: '30px',
+                  width: safeInternalWidth < 800 ? '60%' : '30%',
+                  maxWidth: `${500 * imacAntiScale}px`,
+                  minWidth: `min(${300 * imacAntiScale}px, 100%)`, // Locks the box to a fixed minimum size so it stops squishing on mobile
+                  height: `${60 * imacAntiScale}px`,
+                  padding: `0 ${inputPadding * imacAntiScale}px`,
+                  // fontSize: `${inputFontSize}px`,
+                  fontSize: `${(30 - (4 * squishFactor)) * imacAntiScale}px`,
+                  fontFamily: 'var(--font-jakarta), sans-serif',
                   color: text_font_colour,
                   outline: 'none',
                 }}
@@ -331,12 +343,15 @@ export default function Home() {
                 style={{
                   pointerEvents: 'auto',
                   backgroundColor: status === "success" ? "#FFC528" : text_font_colour,
-                  boxShadow: `inset 7px 7px 0px #FFC528`,
-                  borderRadius: '999px',
-                  height: `${inputHeight}px`,
-                  padding: `0 ${buttonPadding}px`,
-                  fontSize: `${inputFontSize}px`,
-                  fontFamily: 'var(--font-baloo), sans-serif',
+                  boxShadow: `inset 4px 4px 0px #FFC528`,
+                  borderRadius: '30px',
+                  width: safeInternalWidth < 800 ? `${300 * imacAntiScale}px` : 'auto', // Visually shorter than the input box above it
+                  height: `${70 * imacAntiScale}px`,
+                  // padding: `0 ${buttonPadding}px`,
+                  padding: `0 ${30 * imacAntiScale}px`,
+                  // fontSize: `${inputFontSize}px`,
+                  fontSize: `${Math.max(35, 20 - (4 * squishFactor)) * imacAntiScale}px`,
+                  fontFamily: 'var(--font-jakarta), sans-serif',
                   fontWeight: 'bold',
                   color: '#FFFFFF',
                   border: 'none',
@@ -354,71 +369,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      {/* Content Section below the graphics */}
-      <section className="relative z-50 bg-[#F4FAFC] min-h-[70vh] p-8 md:p-16 flex flex-col items-center border-t-8 border-[#756281]">
-        <h2 className="text-3xl md:text-5xl font-bold text-[#483556] mb-12 pt-8 text-center" style={{ fontFamily: 'var(--font-baloo), sans-serif' }}>
-          Meet Your Future Companions
-        </h2>
-        
-        <div className="relative w-full max-w-5xl overflow-hidden flex flex-col items-center justify-center pt-8 pb-4">
-          <div className="relative h-[380px] md:h-[450px] w-full flex items-center justify-center">
-            {pets.map((pet, i) => {
-              const offset = ((i - activePetIndex + pets.length) % pets.length);
-              let normalizedOffset = offset;
-              if (normalizedOffset > Math.floor(pets.length / 2)) {
-                normalizedOffset -= pets.length;
-              }
-
-              const isCenter = normalizedOffset === 0;
-
-              return (
-                <motion.div
-                  key={pet.name}
-                  animate={{
-                    x: `${normalizedOffset * 95}%`,
-                    scale: isCenter ? 1 : 0.65,
-                    opacity: isCenter ? 1 : 0.4,
-                    zIndex: isCenter ? 10 : 5,
-                  }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className="absolute flex flex-col items-center cursor-pointer"
-                  onClick={() => setActivePetIndex(i)}
-                >
-                  <div className={`w-56 h-56 md:w-80 md:h-80 relative rounded-full overflow-hidden border-8 border-white shadow-xl mb-4 bg-[#E6F3F5] transition-transform duration-300 ${isCenter ? 'hover:scale-105' : ''}`}>
-                    <Image
-                      src={pet.image}
-                      alt={pet.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <h3 
-                    className={`text-3xl md:text-4xl font-black text-[#9E5BC8] tracking-wide transition-opacity duration-300 ${isCenter ? 'opacity-100' : 'opacity-0'}`} 
-                    style={{ fontFamily: 'var(--font-baloo), sans-serif', textShadow: '2px 2px 0px #FFFFFF' }}
-                  >
-                    {pet.name}
-                  </h3>
-                </motion.div>
-              );
-            })}
-          </div>
-          
-          {/* Carousel dots */}
-          <div className="flex gap-4 justify-center mt-2">
-            {pets.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActivePetIndex(i)}
-                className={`w-4 h-4 rounded-full transition-all duration-300 ${
-                  i === activePetIndex ? "bg-[#FFC528] scale-125 shadow-sm" : "bg-gray-300 hover:bg-gray-400"
-                }`}
-                aria-label={`Go to slide ${i + 1}`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Footer (Retained from original) */}
       <footer className="relative z-50 border-t border-white/10 bg-[#483556] py-12">

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Baloo_2 } from "next/font/google";
+import { Geist, Geist_Mono, Baloo_2, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 // redeploy
@@ -18,6 +18,12 @@ const baloo = Baloo_2({
   subsets: ["latin"],
 });
 
+
+const jakarta = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "Mewnie",
   description: "Progress you can feel, Growth you can see.",
@@ -31,7 +37,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${baloo.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${baloo.variable} ${jakarta.variable} antialiased`}
       >
         {children}
       </body>
